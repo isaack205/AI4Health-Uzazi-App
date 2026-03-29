@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --uzazi-rose: 139 34 82;
+    --uzazi-blush: 244 167 185;
+    --uzazi-petal: 252 228 236;
+    --uzazi-cream: 255 248 245;
+    --uzazi-earth: 93 58 26;
+    --uzazi-leaf: 76 175 80;
+    --uzazi-sky: 129 212 250;
+    --uzazi-midnight: 26 10 46;
+    --background: 24 100% 98%;
+    --foreground: 26 38% 23%;
+    --card: 0 0% 100%;
+    --card-foreground: 26 38% 23%;
+    --primary: 331 60% 34%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 341 79% 95%;
+    --secondary-foreground: 26 38% 23%;
+    --muted: 24 36% 95%;
+    --muted-foreground: 26 18% 40%;
+    --accent: 197 88% 88%;
+    --accent-foreground: 262 53% 11%;
+    --border: 25 23% 88%;
+    --input: 25 23% 88%;
+    --ring: 331 60% 34%;
+    --radius: 1.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-uzazi-cream font-body text-uzazi-earth antialiased;
+    background-image:
+      radial-gradient(circle at top left, rgba(244, 167, 185, 0.2), transparent 30%),
+      linear-gradient(180deg, rgba(255, 248, 245, 1) 0%, rgba(252, 228, 236, 0.35) 100%);
+    min-height: 100vh;
+    position: relative;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(26, 10, 46, 0.9) 0.6px, transparent 0.8px),
+      radial-gradient(circle at 80% 40%, rgba(93, 58, 26, 0.9) 0.6px, transparent 0.8px),
+      radial-gradient(circle at 50% 70%, rgba(139, 34, 82, 0.9) 0.6px, transparent 0.8px);
+    background-size: 16px 16px, 20px 20px, 22px 22px;
+    z-index: 0;
+  }
+
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@layer components {
+  .text-display {
+    @apply font-display font-semibold tracking-tight;
+  }
+
+  .card-soft {
+    @apply rounded-[32px] border border-white/80 bg-white/85 shadow-soft backdrop-blur;
+  }
+
+  .badge-bloom {
+    @apply inline-flex items-center rounded-full border border-uzazi-blush/50 bg-uzazi-petal px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-uzazi-rose;
+  }
+}
