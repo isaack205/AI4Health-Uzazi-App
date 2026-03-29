@@ -8,6 +8,7 @@ import { collection, addDoc, serverTimestamp, query, where, orderBy, limit, getD
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/providers/AuthProvider";
 import { useLocale } from "@/providers/LanguageProvider";
+import { useToast } from "@/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BreathingExercise } from "@/components/mother/breathing-exercise";
@@ -18,6 +19,7 @@ export default function CompanionPage() {
   const { user } = useAuth();
   const { t, locale } = useLocale();
   const router = useRouter();
+  const { toast } = useToast();
   
   const [messages, setMessages] = useState<CompanionMessage[]>([]);
   const [input, setInput] = useState("");
@@ -136,6 +138,13 @@ export default function CompanionPage() {
               }
               if (parsed.triggerBreathing) {
                 setShowBreathing(true);
+              }
+              if (parsed.earnedPetals) {
+                // Show a toast or local state for the +5 petals
+                toast({
+                  title: "Night Bonus!",
+                  description: `+${parsed.earnedPetals} petals added to your garden for seeking support tonight.`
+                });
               }
             } catch (e) {
               // Handle partial JSON or formatting issues

@@ -48,9 +48,12 @@ export function MothersTable() {
                   <td className="px-6 py-4 text-uzazi-earth/75">{mother.county}</td>
                   <td className="px-6 py-4 font-mono text-uzazi-earth">{mother.postpartumDay}</td>
                   <td className="px-6 py-4">
-                    <Badge variant={mother.riskLevel === "high" ? "default" : mother.riskLevel === "medium" ? "info" : "success"}>
-                      {mother.riskLevel}
-                    </Badge>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant={mother.riskLevel === "high" ? "default" : mother.riskLevel === "medium" ? "info" : "success"}>
+                        {mother.riskLevel}
+                      </Badge>
+                      {mother.assignmentStatus === "urgent" ? <Badge variant="destructive">Urgent</Badge> : null}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <Button asChild size="sm" variant="outline">

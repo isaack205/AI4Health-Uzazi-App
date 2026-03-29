@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signOut as firebaseSignOut } from "firebase/auth";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,6 +23,7 @@ import { LoadingBloom } from "@/components/auth/loading-bloom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { auth } from "@/lib/firebase";
 import { useToast } from "@/providers/ToastProvider";
 import { useLocale } from "@/providers/LanguageProvider";
 
@@ -96,6 +98,10 @@ export function LoginForm({ returnTo }: { returnTo?: string }) {
 
   const onSubmit = handleSubmit(async (values) => {
     try {
+      // Clear any existing session to prevent "auto-login" interference or "wrong details" confusion
+      await fetch("/api/session", { method: "DELETE" });
+      await firebaseSignOut(auth);
+
       const { profile } = await signInWithIdentifier(values.identifier, values.password);
       router.replace(resolveDestination(profile.role, returnTo));
 
@@ -133,6 +139,10 @@ export function LoginForm({ returnTo }: { returnTo?: string }) {
     let keepLoading = false;
 
     try {
+      // Clear session before Google sign-in too
+      await fetch("/api/session", { method: "DELETE" });
+      await firebaseSignOut(auth);
+
       const result = await signInWithGoogleFlow({
         language: locale,
       });

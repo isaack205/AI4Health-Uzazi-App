@@ -24,10 +24,21 @@ export function useMothers(chwId?: string) {
       const mothers: Mother[] = [];
       
       snapshot.forEach((doc) => {
-        mothers.push(doc.data() as Mother);
+        mothers.push({ uid: doc.id, ...(doc.data() as Mother) });
       });
 
-      return mothers;
+      return mothers.sort((left, right) => {
+        const rank = { urgent: 0, watch: 1, stable: 2 } as const;
+        const leftRank = rank[left.assignmentStatus ?? "stable"];
+        const rightRank = rank[right.assignmentStatus ?? "stable"];
+        if (leftRank !== rightRank) {
+          return leftRank - rightRank;
+        }
+
+        const leftRisk = left.riskLevel === "high" ? 0 : left.riskLevel === "medium" ? 1 : 2;
+        const rightRisk = right.riskLevel === "high" ? 0 : right.riskLevel === "medium" ? 1 : 2;
+        return leftRisk - rightRisk;
+      });
     },
     enabled: !!chwId,
     staleTime: 60_000,

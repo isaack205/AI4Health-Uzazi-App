@@ -16,7 +16,8 @@ function redirectToLogin(request: NextRequest) {
 }
 
 export async function middleware(request: NextRequest) {
-  const requiredRole = getRequiredRole(request.nextUrl.pathname);
+  const { pathname, search } = request.nextUrl;
+  const requiredRole = getRequiredRole(pathname);
 
   if (!requiredRole) {
     return NextResponse.next();
@@ -25,14 +26,18 @@ export async function middleware(request: NextRequest) {
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
 
-  if (!projectId || !sessionCookie) {
+  if (!projectId || !sessionCookie || sessionCookie === "") {
     return redirectToLogin(request);
   }
 
   const session = await verifySessionCookie(sessionCookie, projectId);
 
   if (!session) {
-    return redirectToLogin(request);
+    // If the session is invalid, clear the cookies and redirect to login
+    const response = redirectToLogin(request);
+    response.cookies.delete(SESSION_COOKIE_NAME);
+    response.cookies.delete(ROLE_COOKIE_NAME);
+    return response;
   }
 
   const roleCookie = request.cookies.get(ROLE_COOKIE_NAME)?.value;
@@ -42,10 +47,7 @@ export async function middleware(request: NextRequest) {
     const redirectUrl = new URL(role ? getDefaultRouteForRole(role) : "/login", request.url);
 
     if (!role) {
-      redirectUrl.searchParams.set(
-        "returnTo",
-        `${request.nextUrl.pathname}${request.nextUrl.search}`,
-      );
+      redirectUrl.searchParams.set("returnTo", `${pathname}${search}`);
     }
 
     return NextResponse.redirect(redirectUrl);

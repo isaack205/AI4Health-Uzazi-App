@@ -58,8 +58,10 @@ export default function ResultPage() {
               riskScore: checkin.riskScore,
               riskLevel: checkin.riskLevel,
               aiAdvice: checkin.aiSummary,
-              dayPostpartum: (user as Mother).postpartumDay,
-              symptoms: checkin.responses.reduce((acc: any, r) => ({ ...acc, [r.questionId]: r.answer }), {})
+              dayPostpartum: checkin.dayPostpartum ?? (user as Mother).postpartumDay,
+              symptoms: checkin.answersMap && Object.keys(checkin.answersMap).length > 0
+                ? checkin.answersMap
+                : checkin.responses.reduce((acc: any, r) => ({ ...acc, [r.questionId]: r.answer }), {})
             });
           } else {
             router.replace("/checkin");

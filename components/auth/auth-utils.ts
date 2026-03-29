@@ -85,11 +85,22 @@ export const TESTIMONIAL_PILLS = [
 let persistencePromise: Promise<void> | null = null;
 
 export function normalizePhoneNumber(value: string) {
-  return value.replace(/[^\d+]/g, "");
+  const digits = value.replace(/\D/g, "");
+
+  if (digits.startsWith("0") && digits.length === 10) {
+    return `+254${digits.slice(1)}`;
+  }
+
+  if (digits.startsWith("254") && digits.length === 12) {
+    return `+${digits}`;
+  }
+
+  return value.trim().startsWith("+") ? `+${digits}` : digits;
 }
 
 export function isPhoneNumber(value: string) {
-  return PHONE_REGEX.test(normalizePhoneNumber(value));
+  const normalized = normalizePhoneNumber(value);
+  return normalized.startsWith("+") && normalized.length >= 10 && normalized.length <= 15;
 }
 
 export function isEmailAddress(value: string) {
@@ -104,6 +115,11 @@ export function toAuthEmail(identifier: string, emailOverride?: string) {
   }
 
   const phone = normalizePhoneNumber(candidate);
+  
+  if (phone.length < 7) {
+    return `invalid-identifier@${PHONE_ALIAS_DOMAIN}`;
+  }
+
   return `${phone.replace(/^\+/, "")}@${PHONE_ALIAS_DOMAIN}`;
 }
 

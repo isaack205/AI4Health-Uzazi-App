@@ -1,0 +1,72 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+
+    function isRole(role) {
+      return isSignedIn() && userDoc(request.auth.uid).data.role == role;
+    }
+
+    function isMother() {
+      return isRole("mother");
+    }
+
+    function isCHW() {
+      return isRole("chw");
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isCHW();
+      allow delete: if false;
+    }
+
+    match /checkins/{checkinId} {
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid;
+
+      allow read: if isSignedIn()
+        && (
+          resource.data.userId == request.auth.uid
+          || isCHW()
+        );
+
+      allow update, delete: if false;
+    }
+
+    match /posts/{postId} {
+      allow read: if isSignedIn();
+
+      allow create: if isMother()
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update: if isMother()
+        && (
+          resource.data.userId == request.auth.uid
+          || (
+            request.resource.data.diff(resource.data).changedKeys().hasOnly([
+              "reactions",
+              "userReactions",
+              "reportedBy",
+              "reportCount",
+              "updatedAt"
+            ])
+          )
+        );
+
+      allow delete: if false;
+    }
+  }
+}

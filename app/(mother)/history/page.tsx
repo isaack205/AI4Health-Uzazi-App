@@ -17,6 +17,18 @@ import { DayProgressStrip } from "@/components/ui/DayProgressStrip";
 import { getSymptomChips } from "@/lib/utils/symptomUtils";
 import type { CheckIn, Mother } from "@/lib/types";
 
+function normalizeDate(value: unknown) {
+  if (typeof (value as { toDate?: () => Date })?.toDate === "function") {
+    return (value as { toDate: () => Date }).toDate();
+  }
+
+  if (typeof value === "string" || value instanceof Date) {
+    return new Date(value);
+  }
+
+  return new Date();
+}
+
 export default function HistoryPage() {
   const { user } = useAuth();
   const { t } = useLocale();
@@ -40,8 +52,8 @@ export default function HistoryPage() {
         const data = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          // Ensure we have dayPostpartum or compute it from timestamp if missing
-          dayPostpartum: doc.data().dayPostpartum || 1 
+          dayPostpartum: doc.data().dayPostpartum || 1,
+          answersMap: doc.data().answersMap || {},
         }));
         setCheckins(data);
       } catch (err) {
@@ -141,7 +153,11 @@ export default function HistoryPage() {
           ) : (
             checkins.map((checkin) => {
               const isExpanded = expandedId === checkin.id;
-              const dateStr = new Date(checkin.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+              const dateStr = normalizeDate(checkin.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+              const symptomSource =
+                checkin.answersMap && Object.keys(checkin.answersMap).length > 0
+                  ? checkin.answersMap
+                  : checkin.responses.reduce((acc: any, r: any) => ({ ...acc, [r.questionId]: r.answer }), {});
               
               return (
                 <Card 
@@ -188,7 +204,7 @@ export default function HistoryPage() {
                           <div className="space-y-2">
                             <h4 className="text-xs font-bold uppercase tracking-widest text-uzazi-earth/40">Symptoms</h4>
                             <div className="flex flex-wrap gap-2">
-                              {getSymptomChips(checkin.responses.reduce((acc: any, r: any) => ({ ...acc, [r.questionId]: r.answer }), {}), t).map((chip, idx) => (
+                              {getSymptomChips(symptomSource, t).map((chip, idx) => (
                                 <SymptomChip key={idx} label={chip.label} severity={chip.severity} />
                               ))}
                             </div>

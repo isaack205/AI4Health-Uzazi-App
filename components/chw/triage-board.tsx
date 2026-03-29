@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, Clock3, HeartPulse } from "lucide-react";
+import { AlertTriangle, ArrowRight, Clock3, HeartPulse, Siren } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -67,20 +67,33 @@ export function TriageBoard() {
                   <CardTitle className="text-uzazi-earth">{item.name}</CardTitle>
                   <p className="mt-2 text-sm text-uzazi-earth/70">{item.county}</p>
                 </div>
-                <Badge variant={item.riskLevel === "high" ? "default" : item.riskLevel === "medium" ? "info" : "success"}>
-                  {item.riskLevel.toUpperCase()}
-                </Badge>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={item.riskLevel === "high" ? "default" : item.riskLevel === "medium" ? "info" : "success"}>
+                    {item.riskLevel.toUpperCase()}
+                  </Badge>
+                  {item.assignmentStatus === "urgent" ? (
+                    <Badge variant="destructive">
+                      <Siren className="mr-1 h-3 w-3" />
+                      Auto-routed
+                    </Badge>
+                  ) : null}
+                </div>
               </CardHeader>
               <CardContent className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <p className="text-sm leading-7 text-uzazi-earth/80">
-                    {item.riskLevel === "high" 
-                      ? "High risk pattern detected. Immediate follow-up recommended." 
-                      : item.riskLevel === "medium" 
-                      ? "Moderate concern. Review recent check-in when possible."
-                      : "Routine follow-up with positive recovery trend."}
+                    {item.escalationReason || (
+                      item.riskLevel === "high" 
+                        ? "High risk pattern detected. Immediate follow-up recommended." 
+                        : item.riskLevel === "medium" 
+                        ? "Moderate concern. Review recent check-in when possible."
+                        : "Routine follow-up with positive recovery trend."
+                    )}
                   </p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-uzazi-earth/45">Postpartum Day {item.postpartumDay}</p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-uzazi-earth/45">
+                    Postpartum Day {item.postpartumDay}
+                    {item.autoAssignedAt ? ` • Routed ${new Date(item.autoAssignedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}
+                  </p>
                 </div>
                 <Button asChild>
                   <Link href={`/visit/${item.uid}`}>

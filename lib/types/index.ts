@@ -41,6 +41,11 @@ export interface Appointment {
 export interface Mother extends User {
   postpartumDay: number;
   assignedCHW: string;
+  assignedCHWName?: string;
+  assignmentStatus?: "stable" | "watch" | "urgent";
+  escalationReason?: string;
+  autoAssignedAt?: string;
+  lastEscalatedCheckInId?: string;
   riskLevel: RiskLevel;
   gardenPetals: number;
   badges: Badge[];
@@ -72,6 +77,12 @@ export interface CheckIn {
   userId: string;
   timestamp: string;
   responses: CheckInResponse[];
+  answersMap?: Record<string, string | number | boolean>;
+  inputMode?: "guided" | "written";
+  dayPostpartum?: number;
+  assignedCHW?: string;
+  escalatedToCHW?: boolean;
+  escalationReason?: string;
   riskScore: number;
   riskLevel: RiskLevel;
   aiSummary: string;
